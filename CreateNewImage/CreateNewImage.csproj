@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Image.Calendar\Image.Calendar.Google.csproj" />
     <ProjectReference Include="..\Image.Core\Image.Core.csproj" />
   </ItemGroup>
 

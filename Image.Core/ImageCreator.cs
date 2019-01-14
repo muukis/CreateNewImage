@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Image.Statics;
 
 namespace Image.Core
 {
@@ -14,7 +15,7 @@ namespace Image.Core
 
         private const int IMAGE_MARGINAL = 5;
         private const int HEADER_FONTSIZE = 22;
-        private const int ITEM_FONTSIZE = 20;
+        private const int ITEM_FONTSIZE = 18;
         private const int FOOTER_FONTSIZE = 24;
 
         private const int HEADER_LINE_MARGINAL = 5;
@@ -54,8 +55,8 @@ namespace Image.Core
         {
             var fontFamily = new FontFamily(FontFamilyName);
             var fontHeader = new Font(fontFamily, HEADER_FONTSIZE, FontStyle.Bold);
-            var fontItem = new Font(fontFamily, ITEM_FONTSIZE, FontStyle.Regular);
-            var fontFooter = new Font(fontFamily, FOOTER_FONTSIZE, FontStyle.Regular);
+            var fontItem = new Font(fontFamily, ITEM_FONTSIZE, FontStyle.Bold);
+            var fontFooter = new Font(fontFamily, FOOTER_FONTSIZE, FontStyle.Bold);
 
             var image = new Bitmap(WIDTH, HEIGHT);
             var graph = Graphics.FromImage(image);
@@ -64,10 +65,10 @@ namespace Image.Core
             graph.FillRectangle(BRUSH_WHITE, WIDTH_HALF, 0, WIDTH - WIDTH_HALF, HEIGHT);
             graph.FillRectangle(BRUSH_RED, 0, FOOTER_POSITION_Y, WIDTH, HEIGHT);
 
-            graph.DrawString($"OSTOSLISTA ({ShoppingList.Count})", fontHeader, BRUSH_RED, new PointF(IMAGE_MARGINAL, IMAGE_MARGINAL));
             graph.DrawLine(new Pen(BRUSH_WHITE, HEADER_LINE_WIDTH), 0, HEADER_LINE_POSITION_Y, WIDTH_HALF, HEADER_LINE_POSITION_Y);
 
             var sortedShoppingList = ShoppingList.OrderBy(si => si).ToList();
+            int displayedShoppingItemCount = 0;
 
             for (int i = 0; i < sortedShoppingList.Count; i++)
             {
@@ -78,10 +79,16 @@ namespace Image.Core
                     break;
                 }
 
+                displayedShoppingItemCount++;
                 graph.DrawString(sortedShoppingList[i], fontItem, BRUSH_WHITE, new PointF(IMAGE_MARGINAL, nextY));
             }
 
-            graph.DrawString($"KALENTERI ({CalendarItems.Count})", fontHeader, BRUSH_RED, new PointF(WIDTH_HALF + IMAGE_MARGINAL, IMAGE_MARGINAL));
+            graph.DrawString(
+                "OSTOSLISTA" + (displayedShoppingItemCount < ShoppingList.Count
+                    ? $" (+{ShoppingList.Count - displayedShoppingItemCount})"
+                    : string.Empty), fontHeader, BRUSH_RED, new PointF(IMAGE_MARGINAL, IMAGE_MARGINAL));
+
+            graph.DrawString("KALENTERI", fontHeader, BRUSH_RED, new PointF(WIDTH_HALF + IMAGE_MARGINAL, IMAGE_MARGINAL));
             graph.DrawLine(new Pen(BRUSH_RED, HEADER_LINE_WIDTH), WIDTH_HALF, HEADER_LINE_POSITION_Y, WIDTH, HEADER_LINE_POSITION_Y);
 
             var sortedCalendarItems = CalendarItems.OrderBy(ci => ci.Time).ToList();
