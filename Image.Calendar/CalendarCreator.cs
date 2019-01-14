@@ -25,11 +25,11 @@ namespace Image.Calendar.Google
 
             using (var service = CreateCalendarService())
             {
-                var t = service.CalendarList.List();
-                var tt = t.Execute();
-                var ttt = tt.Items.Where(c => c.Selected ?? false).ToList();
+                var calendarsRequest = service.CalendarList.List();
+                var calendars = calendarsRequest.Execute();
+                var selectedCalendars = calendars.Items.Where(c => c.Selected ?? false).ToList();
 
-                foreach (var calendarListEntry in ttt)
+                foreach (var calendarListEntry in selectedCalendars)
                 {
                     Console.WriteLine($"Calendar: {calendarListEntry.Summary}");
                     // Define parameters of request.
