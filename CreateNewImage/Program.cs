@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Image.Calendar.Google;
 using Image.Core;
 using Image.Statics;
+using Image.ShoppingList;
+using Image.ShoppingList.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace CreateNewImage
 {
@@ -10,16 +14,23 @@ namespace CreateNewImage
     {
         static void Main(string[] args)
         {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
             var imageCreator = new ImageCreator();
 
-            imageCreator.ShoppingList.Add("Maitoa");
-            imageCreator.ShoppingList.Add("Leipää");
-            imageCreator.ShoppingList.Add("Voita");
-            imageCreator.ShoppingList.Add("Vessapaperia");
-            imageCreator.ShoppingList.Add("Ketsuppia");
-            imageCreator.ShoppingList.Add("Perunoita");
-            imageCreator.ShoppingList.Add("Olutta");
-            imageCreator.ShoppingList.Add("Puurohiutaleita");
+            using (var shoppingListClient = new ShoppingListAPI(new Uri(config["shoppingListApiUrl"])))
+            {
+                if (shoppingListClient.GetAllShoppingListItems(config["shoppingListShopperName"]) is List<ShoppingListItemResult> items)
+                {
+                    foreach (var item in items)
+                    {
+                        imageCreator.ShoppingList.Add(item.Title);
+                    }
+                }
+            }
 
             ICalendarCreator creator = new CalendarCreator();
             imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20));
