@@ -62,8 +62,9 @@ namespace Image.Core
             blackGraph.Clear(Color.White);
             redGraph.Clear(Color.White);
 
-            blackGraph.FillRectangle(BRUSH_BLACK, 0, 0, WIDTH_HALF, FOOTER_POSITION_Y);
-            redGraph.FillRectangle(BRUSH_BLACK, 0, FOOTER_POSITION_Y, WIDTH, HEIGHT);
+            blackGraph.FillRectangle(BRUSH_BLACK, 0, 0, WIDTH_HALF, FOOTER_POSITION_Y); // Left black box
+            blackGraph.FillRectangle(BRUSH_BLACK, 0, FOOTER_POSITION_Y, WIDTH, HEIGHT); // Footer (black text)
+            redGraph.FillRectangle(BRUSH_BLACK, 0, FOOTER_POSITION_Y, WIDTH, HEIGHT); // Footer red box
 
             blackGraph.DrawLine(new Pen(BRUSH_WHITE, HEADER_LINE_WIDTH), 0, HEADER_LINE_POSITION_Y, WIDTH_HALF, HEADER_LINE_POSITION_Y);
 
