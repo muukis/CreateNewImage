@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using Image.Statics;
 
@@ -30,13 +31,8 @@ namespace Image.Core
         private static readonly int WIDTH_HALF = WIDTH / 2;
         private static readonly int FOOTER_POSITION_Y = HEIGHT - FOOTER_HEIGHT;
 
-        private static readonly Color COLOR_BLACK = Color.FromArgb(0, 0, 0);
-        private static readonly Color COLOR_WHITE = Color.FromArgb(255, 255, 255);
-        private static readonly Color COLOR_RED = Color.FromArgb(237, 28, 36);
-
-        private static readonly Brush BRUSH_BLACK = new SolidBrush(COLOR_BLACK);
-        private static readonly Brush BRUSH_WHITE = new SolidBrush(COLOR_WHITE);
-        private static readonly Brush BRUSH_RED = new SolidBrush(COLOR_RED);
+        private static readonly Brush BRUSH_BLACK = new SolidBrush(Color.Black);
+        private static readonly Brush BRUSH_WHITE = new SolidBrush(Color.White);
 
         public ImageCreator()
         {
@@ -51,21 +47,25 @@ namespace Image.Core
 
         public List<CalendarItem> CalendarItems { get; set; }
 
-        public Bitmap CreateBitmap()
+        public WaveshareImages CreateBitmaps()
         {
+            var retval = new WaveshareImages();
+
             var fontFamily = new FontFamily(FontFamilyName);
             var fontHeader = new Font(fontFamily, HEADER_FONTSIZE, FontStyle.Bold);
             var fontItem = new Font(fontFamily, ITEM_FONTSIZE, FontStyle.Bold);
             var fontFooter = new Font(fontFamily, FOOTER_FONTSIZE, FontStyle.Bold);
 
-            var image = new Bitmap(WIDTH, HEIGHT);
-            var graph = Graphics.FromImage(image);
+            var blackGraph = Graphics.FromImage(retval.BlackImage);
+            var redGraph = Graphics.FromImage(retval.RedImage);
 
-            graph.Clear(COLOR_BLACK);
-            graph.FillRectangle(BRUSH_WHITE, WIDTH_HALF, 0, WIDTH - WIDTH_HALF, HEIGHT);
-            graph.FillRectangle(BRUSH_RED, 0, FOOTER_POSITION_Y, WIDTH, HEIGHT);
+            blackGraph.Clear(Color.White);
+            redGraph.Clear(Color.White);
 
-            graph.DrawLine(new Pen(BRUSH_WHITE, HEADER_LINE_WIDTH), 0, HEADER_LINE_POSITION_Y, WIDTH_HALF, HEADER_LINE_POSITION_Y);
+            blackGraph.FillRectangle(BRUSH_BLACK, 0, 0, WIDTH_HALF, FOOTER_POSITION_Y);
+            redGraph.FillRectangle(BRUSH_BLACK, 0, FOOTER_POSITION_Y, WIDTH, HEIGHT);
+
+            blackGraph.DrawLine(new Pen(BRUSH_WHITE, HEADER_LINE_WIDTH), 0, HEADER_LINE_POSITION_Y, WIDTH_HALF, HEADER_LINE_POSITION_Y);
 
             var sortedShoppingList = ShoppingList.OrderBy(si => si).ToList();
             int displayedShoppingItemCount = 0;
@@ -80,18 +80,23 @@ namespace Image.Core
                 }
 
                 displayedShoppingItemCount++;
-                graph.DrawString(sortedShoppingList[i], fontItem, BRUSH_WHITE, new PointF(IMAGE_MARGINAL, nextY));
+                blackGraph.DrawString(sortedShoppingList[i], fontItem, BRUSH_WHITE, new PointF(IMAGE_MARGINAL, nextY));
+                //redGraph.DrawString(sortedShoppingList[i], fontItem, BRUSH_BLACK, new PointF(IMAGE_MARGINAL, nextY));
             }
 
-            graph.DrawString(
-                "OSTOSLISTA" + (displayedShoppingItemCount < ShoppingList.Count
-                    ? $" (+{ShoppingList.Count - displayedShoppingItemCount})"
-                    : string.Empty), fontHeader, BRUSH_RED, new PointF(IMAGE_MARGINAL, IMAGE_MARGINAL));
+            string ostoslistaHeader = "OSTOSLISTA" + (displayedShoppingItemCount < ShoppingList.Count
+                                          ? $" (+{ShoppingList.Count - displayedShoppingItemCount})"
+                                          : string.Empty);
 
-            graph.DrawString("KALENTERI", fontHeader, BRUSH_RED, new PointF(WIDTH_HALF + IMAGE_MARGINAL, IMAGE_MARGINAL));
-            graph.DrawLine(new Pen(BRUSH_RED, HEADER_LINE_WIDTH), WIDTH_HALF, HEADER_LINE_POSITION_Y, WIDTH, HEADER_LINE_POSITION_Y);
+            //blackGraph.DrawString(ostoslistaHeader, fontHeader, BRUSH_WHITE, new PointF(IMAGE_MARGINAL, IMAGE_MARGINAL));
+            redGraph.DrawString(ostoslistaHeader, fontHeader, BRUSH_BLACK, new PointF(IMAGE_MARGINAL, IMAGE_MARGINAL));
+
+            redGraph.DrawString("KALENTERI", fontHeader, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL, IMAGE_MARGINAL));
+            redGraph.DrawLine(new Pen(BRUSH_BLACK, HEADER_LINE_WIDTH), WIDTH_HALF, HEADER_LINE_POSITION_Y, WIDTH, HEADER_LINE_POSITION_Y);
 
             var sortedCalendarItems = CalendarItems.OrderBy(ci => ci.Time).ToList();
+            CalendarItem lastCalendarItem = null;
+            Graphics calendarItemCanvas = redGraph;
 
             for (int i = 0; i < sortedCalendarItems.Count; i++)
             {
@@ -102,13 +107,23 @@ namespace Image.Core
                     break;
                 }
 
-                graph.DrawString(sortedCalendarItems[i].ToString(), fontItem, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL, nextY));
+                var currentCalendarItem = sortedCalendarItems[i];
+
+                if (lastCalendarItem?.Time.Date != currentCalendarItem.Time.Date)
+                {
+                    calendarItemCanvas = (calendarItemCanvas == blackGraph ? redGraph : blackGraph);
+                }
+
+                calendarItemCanvas.DrawString(sortedCalendarItems[i].ToString(), fontItem, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL, nextY));
+                lastCalendarItem = currentCalendarItem;
             }
 
-            DateTime now = DateTime.Now;
-            graph.DrawString(now.ToString("D").ToUpper(), fontFooter, BRUSH_BLACK, new PointF(IMAGE_MARGINAL, FOOTER_POSITION_Y + IMAGE_MARGINAL));
+            string footer = DateTime.Now.ToString("D", CultureInfo.GetCultureInfo("fi-fi")).ToUpper();
 
-            return image;
+            //blackGraph.DrawString(footer, fontFooter, BRUSH_BLACK, new PointF(IMAGE_MARGINAL, FOOTER_POSITION_Y + IMAGE_MARGINAL));
+            redGraph.DrawString(footer, fontFooter, BRUSH_WHITE, new PointF(IMAGE_MARGINAL, FOOTER_POSITION_Y + IMAGE_MARGINAL));
+
+            return retval;
         }
     }
 }

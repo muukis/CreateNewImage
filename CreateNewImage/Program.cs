@@ -35,7 +35,9 @@ namespace CreateNewImage
             ICalendarCreator creator = new CalendarCreator();
             imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20));
 
-            imageCreator.CreateBitmap().Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image.bmp"));
+            var waveshareImages = imageCreator.CreateBitmaps(); //.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image.bmp"));
+            waveshareImages.BlackImage.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image-b.bmp"));
+            waveshareImages.RedImage.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image-r.bmp"));
         }
     }
 }
