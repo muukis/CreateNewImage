@@ -5,6 +5,6 @@ namespace Image.Statics
 {
     public interface ICalendarCreator
     {
-        List<CalendarItem> GetCalendarItems(int count);
+        List<CalendarItem> GetCalendarItems(int count, string rootPath = null);
     }
 }

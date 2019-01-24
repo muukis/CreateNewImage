@@ -17,6 +17,7 @@ namespace Image.Core
         private const int IMAGE_MARGINAL = 5;
         private const int HEADER_FONTSIZE = 22;
         private const int ITEM_FONTSIZE = 18;
+        private const int DAY_FONTSIZE = 11;
         private const int FOOTER_FONTSIZE = 24;
 
         private const int HEADER_LINE_MARGINAL = 5;
@@ -24,7 +25,9 @@ namespace Image.Core
 
         private const int FOOTER_HEIGHT = 45;
 
-        private static readonly int ITEM_ROWHEIGHT = ITEM_FONTSIZE + 4;
+        private const int ITEM_ROW_EXTRA = 4;
+
+        private static readonly int ITEM_ROWHEIGHT = ITEM_FONTSIZE + ITEM_ROW_EXTRA;
         private static readonly int HEADER_LINE_POSITION_Y = IMAGE_MARGINAL + HEADER_FONTSIZE + 2 * HEADER_LINE_MARGINAL + 2;
         private static readonly int DYNAMIC_START_POS_Y = HEADER_LINE_POSITION_Y + HEADER_LINE_MARGINAL;
 
@@ -55,6 +58,7 @@ namespace Image.Core
             var fontHeader = new Font(fontFamily, HEADER_FONTSIZE, FontStyle.Bold);
             var fontItem = new Font(fontFamily, ITEM_FONTSIZE, FontStyle.Bold);
             var fontFooter = new Font(fontFamily, FOOTER_FONTSIZE, FontStyle.Bold);
+            var fontDate = new Font(fontFamily, DAY_FONTSIZE, FontStyle.Bold);
 
             var blackGraph = Graphics.FromImage(retval.BlackImage);
             var redGraph = Graphics.FromImage(retval.RedImage);
@@ -98,6 +102,8 @@ namespace Image.Core
             var sortedCalendarItems = CalendarItems.OrderBy(ci => ci.Time).ToList();
             CalendarItem lastCalendarItem = null;
             Graphics calendarItemCanvas = redGraph;
+            var finnishCulture = CultureInfo.GetCultureInfo("fi-fi");
+            SizeF graphSize = blackGraph.VisibleClipBounds.Size;
 
             for (int i = 0; i < sortedCalendarItems.Count; i++)
             {
@@ -110,12 +116,25 @@ namespace Image.Core
 
                 var currentCalendarItem = sortedCalendarItems[i];
 
+                string dateText = currentCalendarItem.Time.ToString("ddd", finnishCulture).ToUpper();
+                SizeF dateTextSize = calendarItemCanvas.MeasureString(dateText, fontDate);
+                float dateTextPosX = graphSize.Height - nextY - ITEM_FONTSIZE - (2 * ITEM_ROW_EXTRA);
+                float dateTextMovedPosX = dateTextPosX + ((ITEM_ROWHEIGHT - dateTextSize.Width) / 2);
+
                 if (lastCalendarItem?.Time.Date != currentCalendarItem.Time.Date)
                 {
                     calendarItemCanvas = (calendarItemCanvas == blackGraph ? redGraph : blackGraph);
+
+                    calendarItemCanvas.TranslateTransform(0, graphSize.Height);
+                    calendarItemCanvas.RotateTransform(-90);
+                    calendarItemCanvas.DrawString(dateText, fontDate, BRUSH_BLACK, new PointF(dateTextMovedPosX, WIDTH_HALF + 2));
+
+                    calendarItemCanvas.TranslateTransform(graphSize.Height, 0);
+                    calendarItemCanvas.RotateTransform(90);
                 }
 
-                calendarItemCanvas.DrawString(sortedCalendarItems[i].ToString(), fontItem, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL, nextY));
+                calendarItemCanvas.DrawString(currentCalendarItem.ToString(), fontItem, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL + (dateTextSize.Height / 2), nextY));
+
                 lastCalendarItem = currentCalendarItem;
             }
 

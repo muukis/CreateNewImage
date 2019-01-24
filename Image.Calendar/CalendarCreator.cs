@@ -19,11 +19,11 @@ namespace Image.Calendar.Google
         private static readonly string[] Scopes = { CalendarService.Scope.CalendarReadonly };
         private const string ApplicationName = "Google Calendar API .NET Quickstart";
 
-        public List<CalendarItem> GetCalendarItems(int count)
+        public List<CalendarItem> GetCalendarItems(int count, string rootPath = null)
         {
             var calendarItems = new List<CalendarItem>(count);
 
-            using (var service = CreateCalendarService())
+            using (var service = CreateCalendarService(rootPath))
             {
                 var calendarsRequest = service.CalendarList.List();
                 var calendars = calendarsRequest.Execute();
@@ -62,13 +62,25 @@ namespace Image.Calendar.Google
             return calendarItems.OrderBy(ci => ci.Time).Take(count).ToList();
         }
 
-        private UserCredential CreateUserCredentials()
+        private UserCredential CreateUserCredentials(string rootPath = null)
         {
             UserCredential credential;
+            string credentialsPath = "credentials.json";
 
-            using (var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            if (rootPath != null)
             {
-                string credPath = "token.json";
+                credentialsPath = Path.Combine(rootPath, credentialsPath);
+            }
+
+            using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
+            {
+                string credPath =  "token.json";
+
+                if (rootPath != null)
+                {
+                    credPath = Path.Combine(rootPath, credPath);
+                }
+
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
                     Scopes,
@@ -81,12 +93,12 @@ namespace Image.Calendar.Google
             return credential;
         }
 
-        private CalendarService CreateCalendarService()
+        private CalendarService CreateCalendarService(string rootPath = null)
         {
             // Create Google Calendar API service.
             return new CalendarService(new BaseClientService.Initializer()
             {
-                HttpClientInitializer = CreateUserCredentials(),
+                HttpClientInitializer = CreateUserCredentials(rootPath),
                 ApplicationName = ApplicationName,
             });
         }
