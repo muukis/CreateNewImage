@@ -33,9 +33,11 @@ namespace CreateNewImage
                 }
             }
 
+            var blackDuck = System.Drawing.Image.FromFile("blackduck.png");
+
             ICalendarCreator creator = new CalendarCreator();
             imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20, credPath: "token.json"));
-            imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20, credPath: "token2.json", ignoredCalendars: new[] {"Week numbers"}));
+            imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20, credPath: "token2.json", ignoredCalendars: new[] {"Week numbers"}, image: blackDuck));
             imageCreator.CalendarItems = imageCreator.CalendarItems.OrderBy(ci => ci.Time).Take(20).ToList();
 
             var waveshareImages = imageCreator.CreateBitmaps(); //.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image.bmp"));

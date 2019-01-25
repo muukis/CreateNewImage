@@ -5,6 +5,6 @@ namespace Image.Statics
 {
     public interface ICalendarCreator
     {
-        List<CalendarItem> GetCalendarItems(int count, string rootPath = null, string credPath = "token.json", string[] ignoredCalendars = null);
+        List<CalendarItem> GetCalendarItems(int count, string rootPath = null, string credPath = "token.json", string[] ignoredCalendars = null, System.Drawing.Image image = null);
     }
 }

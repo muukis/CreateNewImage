@@ -19,7 +19,7 @@ namespace Image.Calendar.Google
         private static readonly string[] Scopes = { CalendarService.Scope.CalendarReadonly };
         private const string ApplicationName = "Google Calendar API .NET Quickstart";
 
-        public List<CalendarItem> GetCalendarItems(int count, string rootPath = null, string credPath = "token.json", string[] ignoredCalendars = null)
+        public List<CalendarItem> GetCalendarItems(int count, string rootPath = null, string credPath = "token.json", string[] ignoredCalendars = null, System.Drawing.Image image = null)
         {
             var calendarItems = new List<CalendarItem>(count);
 
@@ -52,7 +52,7 @@ namespace Image.Calendar.Google
                         {
                             DateTime when = eventItem.Start.DateTime ?? DateTime.Parse(eventItem.Start.Date);
                             Console.WriteLine($"{eventItem.Summary} ({when:M})", eventItem.Summary, when);
-                            calendarItems.Add(new CalendarItem(when, eventItem.Summary));
+                            calendarItems.Add(new CalendarItem(when, eventItem.Summary, image));
                         }
                     }
                     else

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using Image.Statics;
+using Image = System.Drawing.Image;
 
 namespace Image.Core
 {
@@ -133,7 +134,21 @@ namespace Image.Core
                     calendarItemCanvas.RotateTransform(90);
                 }
 
-                calendarItemCanvas.DrawString(currentCalendarItem.ToString(), fontItem, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL + (dateTextSize.Height / 2), nextY));
+                if (currentCalendarItem.Image != null)
+                {
+                    string calendarItemDateText = string.Format(CalendarItem.DEFAULT_DATETIME_FORMAT, currentCalendarItem.Time);
+                    SizeF calendarItemDateTextSize = calendarItemCanvas.MeasureString(calendarItemDateText, fontItem);
+                    float currentX = WIDTH_HALF + IMAGE_MARGINAL + (dateTextSize.Height / 2);
+                    calendarItemCanvas.DrawString(calendarItemDateText, fontItem, BRUSH_BLACK, new PointF(currentX, nextY));
+                    currentX += calendarItemDateTextSize.Width - 2;
+                    blackGraph.DrawImage(currentCalendarItem.Image, new PointF(currentX, nextY + 4));
+                    currentX += currentCalendarItem.Image.Width + 2;
+                    calendarItemCanvas.DrawString(currentCalendarItem.Title, fontItem, BRUSH_BLACK, new PointF(currentX, nextY));
+                }
+                else
+                {
+                    calendarItemCanvas.DrawString(currentCalendarItem.ToString(), fontItem, BRUSH_BLACK, new PointF(WIDTH_HALF + IMAGE_MARGINAL + (dateTextSize.Height / 2), nextY));
+                }
 
                 lastCalendarItem = currentCalendarItem;
             }
