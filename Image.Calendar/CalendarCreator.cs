@@ -19,15 +19,18 @@ namespace Image.Calendar.Google
         private static readonly string[] Scopes = { CalendarService.Scope.CalendarReadonly };
         private const string ApplicationName = "Google Calendar API .NET Quickstart";
 
-        public List<CalendarItem> GetCalendarItems(int count, string rootPath = null)
+        public List<CalendarItem> GetCalendarItems(int count, string rootPath = null, string credPath = "token.json", string[] ignoredCalendars = null)
         {
             var calendarItems = new List<CalendarItem>(count);
 
-            using (var service = CreateCalendarService(rootPath))
+            using (var service = CreateCalendarService(rootPath, credPath))
             {
                 var calendarsRequest = service.CalendarList.List();
                 var calendars = calendarsRequest.Execute();
-                var selectedCalendars = calendars.Items.Where(c => c.Selected ?? false).ToList();
+                var selectedCalendars = calendars.Items.Where(c =>
+                    (c.Selected ?? false) && (ignoredCalendars == null || !ignoredCalendars.Any(o =>
+                                                  string.Equals(o, c.Summary,
+                                                      StringComparison.InvariantCultureIgnoreCase)))).ToList();
 
                 foreach (var calendarListEntry in selectedCalendars)
                 {
@@ -59,10 +62,10 @@ namespace Image.Calendar.Google
                 }
             }
 
-            return calendarItems.OrderBy(ci => ci.Time).Take(count).ToList();
+            return calendarItems.Where(o => o.Time.Date >= DateTime.Today).OrderBy(o => o.Time).Take(count).ToList();
         }
 
-        private UserCredential CreateUserCredentials(string rootPath = null)
+        private UserCredential CreateUserCredentials(string rootPath = null, string credPath = "token.json")
         {
             UserCredential credential;
             string credentialsPath = "credentials.json";
@@ -74,8 +77,6 @@ namespace Image.Calendar.Google
 
             using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
             {
-                string credPath =  "token.json";
-
                 if (rootPath != null)
                 {
                     credPath = Path.Combine(rootPath, credPath);
@@ -93,12 +94,12 @@ namespace Image.Calendar.Google
             return credential;
         }
 
-        private CalendarService CreateCalendarService(string rootPath = null)
+        private CalendarService CreateCalendarService(string rootPath = null, string credPath = "token.json")
         {
             // Create Google Calendar API service.
             return new CalendarService(new BaseClientService.Initializer()
             {
-                HttpClientInitializer = CreateUserCredentials(rootPath),
+                HttpClientInitializer = CreateUserCredentials(rootPath, credPath),
                 ApplicationName = ApplicationName,
             });
         }
