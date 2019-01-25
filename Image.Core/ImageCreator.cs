@@ -140,9 +140,9 @@ namespace Image.Core
                     SizeF calendarItemDateTextSize = calendarItemCanvas.MeasureString(calendarItemDateText, fontItem);
                     float currentX = WIDTH_HALF + IMAGE_MARGINAL + (dateTextSize.Height / 2);
                     calendarItemCanvas.DrawString(calendarItemDateText, fontItem, BRUSH_BLACK, new PointF(currentX, nextY));
-                    currentX += calendarItemDateTextSize.Width - 2;
+                    currentX += calendarItemDateTextSize.Width - 4;
                     blackGraph.DrawImage(currentCalendarItem.Image, new PointF(currentX, nextY + 4));
-                    currentX += currentCalendarItem.Image.Width + 2;
+                    currentX += currentCalendarItem.Image.Width - 3;
                     calendarItemCanvas.DrawString(currentCalendarItem.Title, fontItem, BRUSH_BLACK, new PointF(currentX, nextY));
                 }
                 else
