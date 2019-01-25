@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using Image.Statics;
-using Image = System.Drawing.Image;
 
 namespace Image.Core
 {
