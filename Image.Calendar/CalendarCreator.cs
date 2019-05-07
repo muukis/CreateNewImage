@@ -40,7 +40,7 @@ namespace Image.Calendar.Google
                     request.TimeMin = DateTime.Today;
                     request.ShowDeleted = false;
                     request.SingleEvents = true;
-                    request.MaxResults = count;
+                    request.MaxResults = count * 2;
                     request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
 
                     // List events.
@@ -50,8 +50,19 @@ namespace Image.Calendar.Google
                     {
                         foreach (var eventItem in events.Items)
                         {
+                            if (calendarItems.Count >= count)
+                            {
+                                break;
+                            }
+
                             DateTime when = eventItem.Start.DateTime ?? DateTime.Parse(eventItem.Start.Date);
                             Console.WriteLine($"{eventItem.Summary} ({when:M})", eventItem.Summary, when);
+
+                            if (calendarItems.Any(o => o.Time == when && o.Title == eventItem.Summary))
+                            {
+                                continue;
+                            }
+
                             calendarItems.Add(new CalendarItem(when, eventItem.Summary, image));
                         }
                     }

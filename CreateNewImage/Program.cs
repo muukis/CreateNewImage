@@ -38,6 +38,15 @@ namespace CreateNewImage
             ICalendarCreator creator = new CalendarCreator();
             imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20, credPath: "token.json"));
             imageCreator.CalendarItems.AddRange(creator.GetCalendarItems(20, credPath: "token2.json", ignoredCalendars: new[] {"Week numbers"}, image: blackDuck));
+
+            foreach (var item in imageCreator.CalendarItems.ToArray())
+            {
+                if (imageCreator.CalendarItems.Any(o => o != item && o.Time == item.Time && o.Title == item.Title))
+                {
+                    imageCreator.CalendarItems.Remove(item);
+                }
+            }
+
             imageCreator.CalendarItems = imageCreator.CalendarItems.OrderBy(ci => ci.Time).Take(20).ToList();
 
             var waveshareImages = imageCreator.CreateBitmaps(); //.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image.bmp"));
